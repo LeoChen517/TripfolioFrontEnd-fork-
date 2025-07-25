@@ -38,7 +38,7 @@ const props = defineProps({
 
 const handleSubmit = () => {
   if (!input.value.trim()) return;
-  emits("submit", input.value.trim());
+  emit("submit", input.value.trim());
   input.value = ""; // 清空輸入框
 };
 </script>
