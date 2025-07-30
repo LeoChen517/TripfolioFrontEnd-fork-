@@ -164,7 +164,7 @@ async function addPlace(place, date) {
   console.log("🔍 props.role:", props.role);
   console.log("🔍 canEdit:", canEdit.value);
   if (!canEdit.value) {
-    alert("您沒有新增景點權限");
+    alert("您沒有新增景點的權限");
     return false;
   }
 

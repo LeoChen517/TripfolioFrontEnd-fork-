@@ -345,6 +345,7 @@ function callItinerary() {
     }
 
     alert("成功加入行程！");
+  } else {
   }
 }
 
