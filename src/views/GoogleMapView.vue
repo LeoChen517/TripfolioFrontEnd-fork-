@@ -5,6 +5,7 @@
     :selected-place="selectedPlace"
     :selected-date="selectedDate?.date"
     :default-image="defaultImage"
+    :role="role"
   />
 
   <div
@@ -262,6 +263,7 @@ const props = defineProps({
   currentDayIndex: Number,
   dailyPlanRef: Object,
   scheduleDetailRef: Object,
+  role: String,
 });
 
 const { trip, currentDayIndex } = toRefs(props);

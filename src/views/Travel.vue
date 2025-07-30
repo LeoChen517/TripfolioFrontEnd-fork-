@@ -14,6 +14,7 @@
             :daily-plan-ref="dailyPlanRef"
             :schedule-detail-ref="scheduleDetailRef"
             :default-image="defaultImage"
+            :role="role"
             @place-added="handlePlaceAdded"
           />
         </div>
@@ -41,7 +42,7 @@
                 v-for="item in tripStore.trips"
                 :key="item.id"
                 @click="editingTripId = item.id"
-                class="navbar-style rounded-2xl shadow-md shadow-black/40  cursor-pointer hover:ring-2 hover:ring-gray-400 transition z-0"
+                class="navbar-style rounded-2xl shadow-md shadow-black/40 cursor-pointer hover:ring-2 hover:ring-gray-400 transition z-0"
               >
                 <div class="relative">
                   <button
@@ -86,6 +87,7 @@
             :trip-id="editingTripId"
             :selected-date="selectedTrip?.days?.[currentDayIndex]?.date"
             ref="scheduleDetailRef"
+            @role-changed="handleRoleChanged"
             @back="handleCloseDetail"
             @day-changed="currentDayIndex = $event"
             class="w-[50%] lg:w-full"
@@ -146,6 +148,11 @@ const scheduleDetailRef = ref(null);
 const showShareModal = ref(false);
 const shareTripId = ref(null);
 const payResult = ref(null);
+const role = ref("viewer"); // 新增
+
+function handleRoleChanged(newRole) {
+  role.value = newRole;
+}
 
 const selectedTrip = computed(() => {
   return tripStore.trips.find((t) => t.id === editingTripId.value);

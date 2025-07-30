@@ -2,7 +2,8 @@
   <div class="flex items-center justify-between w-50 gap-1 mb-3">
     <select
       v-model="selectedMode"
-      @change="getTravelInfo"
+      @change="canEdit ? getTravelInfo() : alert('您沒有權限變更交通方式')"
+      :disabled="!canEdit"
       class="w-36 px-3 py-1 border-2 border-gray-500 rounded-full text-base bg-white text-[#212121] focus:outline-none focus:ring-2 focus:ring-gray-400"
     >
       <option value="NONE">— 選交通方式 —</option>
@@ -38,7 +39,7 @@ const props = defineProps({
 
 // 🔒 權限控制：判斷是否可編輯
 const canEdit = computed(
-  () => props.role === "owner" || props.role === "editor",
+  () => props.role === "editor" || props.role === "owner",
 );
 
 const selectedMode = ref("NONE");
@@ -80,10 +81,10 @@ watch(
 );
 
 async function getTravelInfo() {
-  // if (!canEdit.value) {
-  //   alert("您沒有權限變更交通方式");
-  //   return;
-  // }
+  if (!canEdit.value) {
+    alert("您沒有權限變更交通方式");
+    return;
+  }
 
   if (selectedMode.value === "NONE") {
     durationText.value = "";

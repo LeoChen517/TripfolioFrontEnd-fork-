@@ -6,6 +6,7 @@
       ref="itineraryRef"
       :trip-id="selectedTrip.id"
       :selected-date="currentDay.date"
+      :role="role"
       class="hidden"
       @refresh="refresh"
     />
@@ -15,7 +16,8 @@
       item-key="id"
       ghost-class="solo-card-style"
       animation="200"
-      @end="updateOrder"
+      @end="canEdit ? updateOrder() : alert('您沒有調整順序的權限')"
+      :disabled="!canEdit"
     >
       <template #item="{ element: p, index }">
         <div class="">
@@ -33,7 +35,7 @@
                 <p
                   v-if="!p.editingTime"
                   class="cursor-pointer pb-2"
-                  @click="startEditing(p)"
+                  @click="canEdit ? startEditing(p) : alert('您沒有編輯權限')"
                 >
                   {{ formatTime(p.arrivalHour, p.arrivalMinute) }}抵達
                 </p>
@@ -42,6 +44,7 @@
                     <select
                       v-model="p.arrivalHourTemp"
                       class="appearance-none outline-0"
+                      :disabled="!canEdit"
                     >
                       <option v-for="h in 24" :key="h" :value="h - 1">
                         {{ (h - 1).toString().padStart(2, "0") }}
@@ -51,6 +54,7 @@
                     <select
                       v-model="p.arrivalMinuteTemp"
                       class="appearance-none outline-0"
+                      :disabled="!canEdit"
                     >
                       <option v-for="m in [0, 15, 30, 45]" :key="m" :value="m">
                         {{ m.toString().padStart(2, "0") }}
@@ -60,7 +64,13 @@
                   </div>
 
                   <div class="flex gap-2 mt-1">
-                    <button @click="confirmTime(p)" class="text-green-300">
+                    <button
+                      @click="
+                        canEdit ? confirmTime(p) : alert('您沒有編輯權限')
+                      "
+                      class="text-green-300"
+                      :disabled="!canEdit"
+                    >
                       更改
                     </button>
                     <button @click="cancelEditing(p)" class="text-red-300">
@@ -78,6 +88,7 @@
 
             <div class="relative">
               <button
+                v-if="canEdit"
                 @click.stop="toggleMenu(index)"
                 class="button-list absolute right-0"
               >
@@ -87,7 +98,7 @@
                 />
               </button>
               <ul
-                v-if="openMenuIndex === index"
+                v-if="openMenuIndex === index && canEdit"
                 class="absolute right-0 mt-12 bg-white shadow rounded"
               >
                 <li>
@@ -115,6 +126,7 @@
             :traffic-data="
               trafficMap[p.id + '-' + itinerarySpots[index + 1].id] || null
             "
+            :role="role"
             @traffic-updated="refresh"
             class="mx-auto"
           />
@@ -234,39 +246,43 @@ function formatTime(hour, minute) {
 
 //呼叫子層
 function startEditing(p) {
-  // if (!canEdit.value) {
-  //   alert("您沒有編輯權限");
-  //   return;
-  // }
+  if (!canEdit.value) {
+    alert("您沒有編輯權限");
+    return;
+  }
   itineraryRef.value?.startEditing(p);
 }
 
 function cancelEditing(p) {
+  if (!canEdit.value) {
+    alert("您沒有編輯權限");
+    return;
+  }
   itineraryRef.value?.cancelEditing(p);
 }
 
 function confirmTime(p) {
-  // if (!canEdit.value) {
-  //   alert("您沒有編輯權限");
-  //   return;
-  // }
+  if (!canEdit.value) {
+    alert("您沒有編輯權限");
+    return;
+  }
   itineraryRef.value?.confirmTime(p);
 }
 
 function removePlace(p) {
-  // if (!canEdit.value) {
-  //   alert("您沒有刪除權限");
-  //   return;
-  // }
+  if (!canEdit.value) {
+    alert("您沒有刪除權限");
+    return;
+  }
   itineraryRef.value?.removePlace(p);
 }
 
 //更新排序
 function updateOrder() {
-  // if (!canEdit.value) {
-  //   alert("您沒有調整順序的權限");
-  //   return;
-  // }
+  if (!canEdit.value) {
+    alert("您沒有調整順序的權限");
+    return;
+  }
   const newOrder = itinerarySpots.value.map((p, i) => ({
     id: p.id,
     placeOrder: i + 1,
