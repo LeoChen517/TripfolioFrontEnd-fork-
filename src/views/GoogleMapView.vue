@@ -322,7 +322,7 @@ function scrollRight() {
 }
 
 //import
-function callItinerary() {
+async function callItinerary() {
   const date = selectedDate.value?.date;
   const place = selectedPlace.value;
 
@@ -331,7 +331,7 @@ function callItinerary() {
     return;
   }
 
-  const success = itineraryRef.value?.addPlace(place, date);
+  const success = await itineraryRef.value?.addPlace(place, date);
 
   if (success) {
     emit("place-added", { place, date });
