@@ -16,53 +16,56 @@
         </button>
       </div>
 
-      <!-- 權限選擇 -->
-      <div class="mb-4">
-        <label class="block mb-1 text-sm text-white font-medium"
-          >權限設定</label
-        >
-        <select
-          v-model="selectedPermission"
-          class="w-full border border-gray-300 rounded-md px-3 py-2 text-white shadow-sm cursor-pointer"
-        >
-          <option value="viewer">僅可檢視</option>
-          <option value="editor">可編輯</option>
-        </select>
-      </div>
-
-      <button
-        @click="generateShareLink"
-        class="bg-white/30 hover:bg-black/20 text-white px-4 py-2 rounded-md w-full font-medium cursor-pointer"
-        :disabled="isLoading"
-      >
-        產生分享連結
-      </button>
-
-      <!-- 分享結果區塊 -->
-      <div v-if="shareUrl" class="mt-6">
-        <label class="block mb-1 text-sm text-white font-medium"
-          >分享連結</label
-        >
-        <div class="flex items-center gap-2">
-          <input
-            :value="shareUrl"
-            readonly
-            class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-white shadow-sm"
-          />
-          <button
-            @click="copyToClipboard"
-            class="text-sm text-white hover:text-white/20 whitespace-nowrap cursor-pointer"
+      <!-- 只有行程擁有者可以看到的產生分享區塊 -->
+      <div v-if="isOwner">
+        <!-- 權限選擇 -->
+        <div class="mb-4">
+          <label class="block mb-1 text-sm text-white font-medium"
+            >權限設定</label
           >
-            複製
-          </button>
+          <select
+            v-model="selectedPermission"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-black shadow-sm cursor-pointer"
+          >
+            <option value="viewer">僅可檢視</option>
+            <option value="editor">可編輯</option>
+          </select>
         </div>
 
-        <div class="mt-4 flex justify-center">
-          <qrcode-vue :value="shareUrl" :size="160" />
-        </div>
+        <button
+          @click="generateShareLink"
+          class="bg-white/30 hover:bg-black/20 text-white px-4 py-2 rounded-md w-full font-medium cursor-pointer"
+          :disabled="isLoading"
+        >
+          產生分享連結
+        </button>
 
-        <div class="text-sm text-white mt-2 text-center">
-          到期時間：{{ formattedExpire }}
+        <!-- 分享結果區塊 -->
+        <div v-if="shareUrl" class="mt-6">
+          <label class="block mb-1 text-sm text-white font-medium"
+            >分享連結</label
+          >
+          <div class="flex items-center gap-2">
+            <input
+              :value="shareUrl"
+              readonly
+              class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm text-white shadow-sm"
+            />
+            <button
+              @click="copyToClipboard"
+              class="text-sm text-white hover:text-white/20 whitespace-nowrap cursor-pointer"
+            >
+              複製
+            </button>
+          </div>
+
+          <div class="mt-4 flex justify-center">
+            <qrcode-vue :value="shareUrl" :size="160" />
+          </div>
+
+          <div class="text-sm text-white mt-2 text-center">
+            到期時間：{{ formattedExpire }}
+          </div>
         </div>
       </div>
 
@@ -94,14 +97,14 @@
                   v-if="isOwner"
                   v-model="user.role"
                   @change="updatePermission(user.id, user.role)"
-                  class="text-sm border border-gray-300 rounded px-2 py-1 text-gray-700"
+                  class="text-sm border border-gray-300 rounded px-2 py-1 text-black"
                 >
                   <option value="viewer">檢視者</option>
                   <option value="editor">編輯者</option>
                 </select>
 
-                <span v-else class="text-sm text-gray-500">{{
-                  user.role
+                <span v-else class="text-sm text-black">{{
+                  formatRole(user.role)
                 }}</span>
 
                 <button
@@ -228,6 +231,15 @@ const removeUser = async (targetUserId) => {
   } catch (err) {
     alert("取消共享失敗");
     console.error(err);
+  }
+};
+
+const formatRole = (role) => {
+  switch (role) {
+    case "viewer":
+      return "檢視者";
+    case "editor":
+      return "編輯者";
   }
 };
 
