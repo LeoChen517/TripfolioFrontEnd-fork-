@@ -16,6 +16,12 @@ const token = route.params.token;
 const checkShareToken = async () => {
   console.log("正在驗證分享 token:", token);
   const loginToken = localStorage.getItem("token");
+  // 未登入直接導向登入頁
+  if (!loginToken) {
+    alert("請先登入再使用連結");
+    router.replace("/login");
+    return;
+  }
   try {
     const url = `${import.meta.env.VITE_API_URL}/api/tripShares/check/${token}`;
     console.log("前端實際打的 URL:", url);
@@ -26,15 +32,15 @@ const checkShareToken = async () => {
     });
     console.log("API 回應成功:", res.data);
     const tripId = res.data.tripId;
-    router.replace("/schedule"); //需確認路由
+    router.replace({ path: "/schedule", query: { openTripId: tripId } });
   } catch (err) {
     console.error("API 呼叫失敗:", err.response?.data || err.message);
     if (err.response?.status === 403) {
       alert("此分享連結已過期");
     } else {
       alert("此分享連結無效或已過期");
-      router.replace("/schedule"); //需確認路由
     }
+    router.replace("/schedule");
   }
 };
 
