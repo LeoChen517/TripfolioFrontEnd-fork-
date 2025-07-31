@@ -46,11 +46,20 @@
               >
                 <div class="relative">
                   <button
+                    v-if="role === 'owner'"
                     @click.stop="deleteSchedule(item.id)"
                     title="刪除行程"
                     class="absolute top-2 right-3 text-gray-600 bg-white px-2 rounded-2xl hover:text-red-500 text-md"
                   >
                     刪除行程
+                  </button>
+                  <button
+                    v-else
+                    @click.stop="leaveSchedule(item.id)"
+                    title="退出行程"
+                    class="absolute top-2 right-3 text-gray-600 bg-white px-2 rounded-2xl hover:text-red-500 text-md"
+                  >
+                    退出行程
                   </button>
                   <button
                     @click.stop="openShareModal(item.id)"
@@ -115,13 +124,14 @@
     <ShareTripModal
       :is-open="showShareModal"
       :trip-id="shareTripId"
+      :role="role"
       @close="closeShareModal"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import TravelSchedule from "@/components/TravelSchedule.vue";
 import axios from "axios";
@@ -184,7 +194,19 @@ onMounted(() => {
     payResult.value = route.query.linepayResult;
     showPayModal.value = true;
   }
+  if (route.query.openTripId) {
+    editingTripId.value = route.query.openTripId;
+  }
 });
+
+watch(
+  () => route.query.openTripId,
+  (newId) => {
+    if (newId) {
+      editingTripId.value = newId;
+    }
+  },
+);
 
 //建立行程時檢查是否登入
 const handleOpenForm = () => {
@@ -252,6 +274,25 @@ const deleteSchedule = async (id) => {
     alert("刪除成功");
   } catch (err) {
     alert("刪除失敗，請稍後再試");
+  }
+};
+
+const leaveSchedule = async (id) => {
+  const confirmed = confirm("確定要退出這個行程嗎？");
+  if (!confirmed) return;
+  const token = localStorage.getItem("token");
+  try {
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/tripShares/leave/${id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      },
+    );
+    tripStore.trips = tripStore.trips.filter((s) => s.id !== id);
+    alert("已退出行程");
+  } catch (err) {
+    alert("退出失敗，請稍後再試");
   }
 };
 

@@ -128,8 +128,14 @@ import QrcodeVue from "qrcode.vue";
 const props = defineProps({
   tripId: Number,
   isOpen: Boolean,
+  role: {
+    type: String, // 🔒 權限控制：接收 role
+  },
 });
 const emit = defineEmits(["close"]);
+const canEdit = computed(
+  () => props.role === "editor" || props.role === "owner",
+);
 
 const selectedPermission = ref("viewer");
 const shareUrl = ref("");
@@ -159,9 +165,6 @@ const generateShareLink = async () => {
     console.log("發送的資料:", data);
     shareUrl.value = res.data.shareUrl;
     expiresAt.value = res.data.expiresAt;
-
-    // 更新共享名單
-    // fetchSharedUsers();
   } catch (err) {
     alert("建立分享連結失敗");
     console.error(err);
