@@ -45,8 +45,9 @@
                 class="navbar-style rounded-2xl shadow-md shadow-black/40 cursor-pointer hover:ring-2 hover:ring-gray-400 transition z-0"
               >
                 <div class="relative">
+                  <!-- 根據角色顯示不同按鈕 -->
                   <button
-                    v-if="role === 'owner'"
+                    v-if="tripRoles[item.id] === 'owner'"
                     @click.stop="deleteSchedule(item.id)"
                     title="刪除行程"
                     class="absolute top-2 right-3 text-gray-600 bg-white px-2 rounded-2xl hover:text-red-500 text-md"
@@ -159,6 +160,7 @@ const showShareModal = ref(false);
 const shareTripId = ref(null);
 const payResult = ref(null);
 const role = ref("viewer"); // 新增
+const tripRoles = ref({}); // 新增：儲存每個行程的角色
 
 function handleRoleChanged(newRole) {
   role.value = newRole;
@@ -182,9 +184,34 @@ const fetchIsPremium = async () => {
   }
 };
 
+// 新增：獲取特定行程的角色
+const fetchTripRole = async (tripId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/tripShares/getPermission/${tripId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      },
+    );
+    tripRoles.value[tripId] = res.data.role;
+  } catch {
+    tripRoles.value[tripId] = "viewer";
+  }
+};
+
+// 新增：獲取所有行程的角色
+const fetchAllTripRoles = async () => {
+  for (const trip of tripStore.trips) {
+    await fetchTripRole(trip.id);
+  }
+};
+
 //首次載入取得行程
-onMounted(() => {
-  tripStore.fetchTrips();
+onMounted(async () => {
+  await tripStore.fetchTrips();
+  await fetchAllTripRoles(); // 新增：獲取所有行程的角色
   fetchIsPremium();
 
   if (
@@ -243,16 +270,18 @@ function refreshDailyPlan() {
 }
 
 //表單關閉後刷新行程列表
-const handleCloseForm = () => {
+const handleCloseForm = async () => {
   showForm.value = false;
-  tripStore.fetchTrips();
+  await tripStore.fetchTrips();
+  await fetchAllTripRoles(); // 新增：重新獲取所有行程的角色
   fetchIsPremium();
 };
 
 //返回總覽同步更新
-const handleCloseDetail = () => {
+const handleCloseDetail = async () => {
   editingTripId.value = null;
-  tripStore.fetchTrips();
+  await tripStore.fetchTrips();
+  await fetchAllTripRoles(); // 新增：重新獲取所有行程的角色
 };
 
 //刪除行程
